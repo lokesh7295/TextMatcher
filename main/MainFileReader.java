@@ -1,6 +1,6 @@
 package main;
 
-import aggregatore.AggregatorService;
+import aggregator.AggregatorService;
 import matcher.MatcherService;
 import matcher.MatcherResult;
 
@@ -55,7 +55,7 @@ public class MainFileReader {
 
             executorService.shutdown();
 
-            List<Map<String, List<MatcherResult>>> allResults = new ArrayList<>();
+            var allResults = new ArrayList();
             for (Future<Map<String, List<MatcherResult>>> future : futures) {
                 try {
                     allResults.add(future.get());

@@ -11,7 +11,7 @@ public class AggregatorService {
         for (Map<String, List<MatcherResult>> resultMap : allResults) {
             for (Map.Entry<String, List<MatcherResult>> entry : resultMap.entrySet()) {
                 String word = entry.getKey();
-                List<MatcherResult> locations = entry.getValue();
+                var locations = entry.getValue();
 
                 aggregatedResults.putIfAbsent(word, new ArrayList<>());
                 aggregatedResults.get(word).addAll(locations);
