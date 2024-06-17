@@ -1,16 +1,22 @@
+package main;
+
+import aggregatore.AggregatorService;
+import matcher.MatcherService;
+import matcher.MatcherResult;
+
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 
 public class MainFileReader {
     private static final int LINES_SPLIT_SIZE = 1000;
-    private static final String COMMON_NAMES = "James,John,Robert,Michael,William,David,Richard,Charles,Joseph,Thomas,Christopher,Daniel,Paul,Mark,Donal" +
-            "d,George,Kenneth,Steven,Edward,Brian,Ronald,Anthony,Kevin,Jason,Matthew,Gary,Timothy,Jose,Larry,Jeffrey," +
-            "Frank,Scott,Eric,Stephen,Andrew,Raymond,Gregory,Joshua,Jerry,Dennis,Walter,Patrick,Peter,Harold,Douglas,H" +
-            "enry,Carl,Arthur,Ryan,Roger";
-    private static final List<String> SEARCH_STRINGS = Arrays.asList(COMMON_NAMES.split(","));
+    private static final List<String> SEARCH_STRINGS = Arrays.asList(("James,John,Robert,Michael,William,David,Richard,Charles,Joseph,Thomas" +
+            ",Christopher,Daniel,Paul,Mark,Donald,George,Kenneth,Steven,Edward,Brian,Ronald,Anthony,Kevin,Jason,Matthew,Gary,Timothy,Jose,Larry" +
+            ",Jeffrey,Frank,Scott,Eric,Stephen,Andrew,Raymond,Gregory,Joshua,Jerry,Dennis,Walter,Patrick,Peter,Harold,Douglas,Henry,Carl" +
+            ",Arthur,Ryan,Roger").split(","));
 
     public static void main(String[] args) {
+        long startTime = System.currentTimeMillis();
         String filePath = "/Users/lokeshpersonal/Desktop/TextMatcher/sample_string.txt";
         List<Future<Map<String, List<MatcherResult>>>> futures = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -18,18 +24,22 @@ public class MainFileReader {
         try  {
             String line;
             StringBuilder searchText = new StringBuilder();
+            List<Integer> charCountByLine = new ArrayList<>();
+            int totalCharsTillNow = 0;
             int lineNumber = 0;
             int totalLinesRead = 0;
             BufferedReader reader = new BufferedReader(new FileReader(filePath));
 
             while ((line = reader.readLine()) != null) {
+                totalCharsTillNow += line.length();
+                charCountByLine.add(totalCharsTillNow);
                 searchText.append(line).append("\n");
                 lineNumber++;
 
                 if (lineNumber % LINES_SPLIT_SIZE == 0) {
                     String chunkText = searchText.toString();
                     int startingLineNumber = totalLinesRead;
-                    futures.add(executorService.submit(() -> Matcher.findMatches(chunkText, SEARCH_STRINGS, startingLineNumber)));
+                    futures.add(executorService.submit(() -> MatcherService.findMatches(chunkText, SEARCH_STRINGS, startingLineNumber, charCountByLine)));
                     searchText.setLength(0);
                     totalLinesRead += lineNumber;
                     lineNumber = 0;
@@ -40,7 +50,7 @@ public class MainFileReader {
             if (!searchText.isEmpty()) {
                 String chunkText = searchText.toString();
                 int startingLineNumber = totalLinesRead;
-                futures.add(executorService.submit(() -> Matcher.findMatches(chunkText, SEARCH_STRINGS, startingLineNumber)));
+                futures.add(executorService.submit(() -> MatcherService.findMatches(chunkText, SEARCH_STRINGS, startingLineNumber, charCountByLine)));
             }
 
             executorService.shutdown();
@@ -54,9 +64,10 @@ public class MainFileReader {
                 }
             }
 
-            Aggregator.aggregateAndPrintResults(allResults);
+            AggregatorService.aggregateAndPrintResults(allResults);
         } catch (IOException e) {
             System.out.println("Exception: " + e);
         }
+        System.out.println("time taken: " + (System.currentTimeMillis() - startTime));
     }
 }

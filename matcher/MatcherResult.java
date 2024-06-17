@@ -1,3 +1,5 @@
+package matcher;
+
 public class MatcherResult {
     private final int lineOffset;
     private final int charOffset;

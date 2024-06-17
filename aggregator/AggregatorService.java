@@ -1,6 +1,10 @@
+package aggregator;
+
+import matcher.MatcherResult;
+
 import java.util.*;
 
-public class Aggregator {
+public class AggregatorService {
     public static void aggregateAndPrintResults(List<Map<String, List<MatcherResult>>> allResults) {
         Map<String, List<MatcherResult>> aggregatedResults = new HashMap<>();
 
